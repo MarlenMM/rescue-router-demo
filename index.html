@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rescue Router</title>
+<meta name="description" content="Few-shot flood mapping from drone photos (Chameleon, 50 labels) and truck/boat rescue routing on the predicted map.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1220'/%3E%3Cpath d='M10 44h44' stroke='%2322d3ee' stroke-width='6' stroke-linecap='round'/%3E%3Cpath d='M14 34l12-14 10 10 14-12' fill='none' stroke='%23f8fafc' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<!-- Leaflet 1.9.4, vendored from unpkg (same bytes as the CDN files: the integrity hashes are the published ones) -->
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="map" aria-label="Drone photo with flood map"></div>
+
+<header class="title card">
+  <h1>Rescue Router</h1>
+  <p id="caption">Loading…</p>
+</header>
+
+<div class="dock" id="dock">
+  <section id="routeCard" class="route-card card" hidden aria-live="polite"></section>
+  <div class="counter card" id="counter" aria-live="polite"></div>
+</div>
+
+<div class="swipe" id="swipe" hidden>
+  <div class="swipe-line"></div>
+  <button class="swipe-handle" id="swipeHandle" aria-label="Drag to compare the prediction and the labelled map">⟷</button>
+  <span class="swipe-tag left">Prediction</span><span class="swipe-tag right">Labelled map</span>
+</div>
+
+<aside class="panel card" id="panel">
+  <button class="sheet-toggle" id="sheetToggle" aria-expanded="true" aria-controls="panelBody">
+    <span class="grip"></span><span class="sheet-label">Controls</span>
+  </button>
+  <div class="panel-body" id="panelBody">
+    <section>
+      <h2>Showcase</h2>
+      <div class="scenes" id="scenes"></div>
+      <h2 class="sub">All test photos</h2>
+      <div class="browse-bar">
+        <button id="prevScene" class="nav" aria-label="Previous photo" title="Previous photo (P)">‹</button>
+        <div class="seg ds" role="radiogroup" aria-label="Dataset">
+          <button role="radio" data-ds="floodnet" aria-checked="true">FloodNet</button>
+          <button role="radio" data-ds="rescuenet" aria-checked="false">RescueNet</button>
+        </div>
+        <button id="nextScene" class="nav" aria-label="Next photo" title="Next photo (N)">›</button>
+      </div>
+      <label class="row sort">Sort <select id="sortScenes" aria-label="Sort the test photos">
+        <option value="id">by photo id</option>
+        <option value="cut">most houses cut off</option>
+        <option value="dis">most disagreements</option>
+        <option value="iou">lowest mean IoU</option>
+      </select></label>
+      <div class="all" id="allScenes" role="list" aria-label="Test photos"></div>
+      <p class="model" id="model"></p>
+      <button id="copyLink" class="link-btn">Copy link to this view</button>
+    </section>
+
+    <section>
+      <h2>Map</h2>
+      <div class="seg" role="radiogroup" aria-label="Map source">
+        <button role="radio" data-src="pred" aria-checked="true">Prediction</button>
+        <button role="radio" data-src="gt" aria-checked="false" title="The same router on the human labels">Labelled map</button>
+        <button role="radio" data-src="swipe" aria-checked="false">Swipe</button>
+      </div>
+      <div class="seg" role="radiogroup" aria-label="Overlay">
+        <button role="radio" data-layer="classes" aria-checked="true">Classes</button>
+        <button role="radio" data-layer="pwet" aria-checked="false" title="The model's water probability per cell (prediction only)">Water probability</button>
+      </div>
+      <div class="pwet-legend" id="pwetLegend" hidden>
+        <div class="ramp" id="pwetRamp"></div>
+        <p id="pwetText"></p>
+      </div>
+      <label class="row"><input type="checkbox" id="tClasses" checked> Overlay <input type="range" id="opacity" min="0" max="100" value="60" aria-label="Overlay opacity"></label>
+      <label class="row"><input type="checkbox" id="tStatus" checked> House status</label>
+      <label class="row"><input type="checkbox" id="tDisagree"> Disagreements with the labelled map <span class="pill" id="nDisagree">0</span></label>
+      <label class="row"><input type="checkbox" id="tBase" checked> Entry points</label>
+      <label class="row"><input type="checkbox" id="tRisk" checked> Risk-aware truck (avoid likely water)</label>
+      <label class="row"><input type="checkbox" id="tCb"> Colour-blind palette</label>
+    </section>
+
+    <section>
+      <h2>Houses <span class="h2-note" id="housesNote"></span></h2>
+      <div class="houses" id="houses" role="listbox" aria-label="Houses in this photo: arrow keys to move, Enter to send a team"></div>
+    </section>
+
+    <section>
+      <h2>Entry point</h2>
+      <p class="entry-mode">Rescue team enters: <span id="entryMode"></span></p>
+      <div class="btns">
+        <button id="entryPick" aria-pressed="false">Choose on map</button>
+        <button id="entryAuto">Auto</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Legend</h2>
+      <ul class="legend" id="legend"></ul>
+      <ul class="legend">
+        <li><span class="badge truck"></span>Reachable by truck (confident)</li>
+        <li><span class="badge check"></span>Probably by truck: check first</li>
+        <li><span class="badge boat"></span>Boat needed</li>
+        <li><span class="badge foot"></span>Last stretch on foot</li>
+        <li><span class="badge isolated"></span>No route: air team</li>
+        <li><span class="line truckline"></span>Truck <span class="line boatline"></span>Boat <span class="line footline"></span>Foot</li>
+        <li><span class="line ghostline"></span>Route on the other map, when they disagree</li>
+        <li><span class="sq base"></span>Entry point (truck or boat)</li>
+      </ul>
+    </section>
+
+    <section class="about">
+      <h2>About</h2>
+      <p>A drone photo is mapped into five classes by <b>Chameleon</b>, adapted from only <b>50 labelled photos</b> (FloodNet) or 20 (RescueNet).
+        A router on 4×4-pixel cells then finds the cheapest way from the entry point to each house: truck on dry ground
+        (roads, or yards at 4× cost; never where water is likely), then a boat across water, then the last stretch on foot
+        (never back into a vehicle). Vehicles have a width: a truck needs about 2.5 m between buildings and a boat
+        about 1.6 m, so neither squeezes through the gap between two houses; people on foot can. The labelled map is the same router run on the human labels: the datasets label pixels,
+        not reachability.</p>
+      <p>Confidence: the prediction is routed twice, with the normal off-road rule (land where p_wet &lt; 0.3 for
+        FloodNet, 0.2 for RescueNet, each tuned on the dataset's validation photos) and a cautious one (p_wet &lt; 0.1 /
+        0.15). Houses a truck reaches even on the cautious map are confident (99 % truly truck-reachable on FloodNet test
+        photos); the others are marked "check first" (74 %). Minutes and metres are
+        rough estimates (truck 20 km/h on roads, 5 off-road, boat 6, on foot 3; scale from the cars in the photo).</p>
+      <p>FloodNet 50-shot: mIoU .47 on the full 448-image test (PSPNet with 1,445 labels: .85 on these classes).
+        One showcase scene is an honest failure: shallow water read as dry land.</p>
+      <p>Besides the 8 showcase scenes you can browse all 200 test photos of the evaluation split (100 FloodNet,
+        100 RescueNet), not picked by us: an orange count is the houses a truck cannot reach on the prediction, a pink dot
+        marks a photo where prediction and labelled map disagree. "Water probability" shows what the model believes
+        cell by cell. The address bar keeps the scene, house, entry point and view, so a link opens exactly this view.</p>
+    </section>
+  </div>
+</aside>
+
+<script src="vendor/leaflet/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+{
+ "id": "8219",
+ "dataset": "floodnet",
+ "run": "floodnet_50shot_s0_stratified",
+ "decode": {
+  "tau": [
+   0.4,
+   0.35,
+   0.45,
+   0.35,
+   0.45
+  ],
+  "variant": "tau"
+ },
+ "caption": "",
+ "size": [
+  768,
+  576
+ ],
+ "photo_px": [
+  1024,
+  768
+ ],
+ "class_names": [
+  "road clear",
+  "road flooded",
+  "building flooded",
+  "building dry",
+  "water"
+ ],
+ "class_colors": [
+  [
+   46,
+   204,
+   64
+  ],
+  [
+   0,
+   116,
+   217
+  ],
+  [
+   230,
+   40,
+   40
+  ],
+  [
+   245,
+   180,
+   0
+  ],
+  [
+   0,
+   31,
+   120
+  ]
+ ],
+ "iou": {
+  "road clear": null,
+  "road flooded": null,
+  "building flooded": null,
+  "building dry": null,
+  "water": null
+ },
+ "miou": null,
+ "n_buildings": 0,
+ "status_pred": {
+  "TRUCK": 0,
+  "BOAT": 0,
+  "FOOT": 0,
+  "ISOLATED": 0
+ },
+ "status_gt": {
+  "TRUCK": 0,
+  "BOAT": 0,
+  "FOOT": 0,
+  "ISOLATED": 0
+ },
+ "n_disagree": 0,
+ "tiers_pred": {
+  "CONFIDENT_TRUCK": 0,
+  "PROBABLE_TRUCK": 0,
+  "BOAT": 0,
+  "FOOT": 0,
+  "ISOLATED": 0
+ },
+ "tier_stats": {
+  "cautious_gate": 0.1,
+  "tuned_gate": 0.3,
+  "confident": 0.9867109634551495,
+  "probable": 0.7407407407407407
+ },
+ "m_per_cell": 0.66,
+ "scale_source": "dataset value"
+}

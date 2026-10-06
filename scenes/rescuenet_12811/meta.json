@@ -1,0 +1,96 @@
+{
+ "id": "12811",
+ "dataset": "rescuenet",
+ "run": "rescuenet_20shot_s0_stratified",
+ "decode": {
+  "tau": [
+   0.8,
+   0.6,
+   0.3,
+   0.3,
+   0.25
+  ],
+  "bldg_t": 0.4,
+  "variant": "tau_bldg"
+ },
+ "caption": "",
+ "size": [
+  768,
+  576
+ ],
+ "photo_px": [
+  768,
+  576
+ ],
+ "class_names": [
+  "road clear",
+  "road blocked",
+  "building intact",
+  "building damaged",
+  "water"
+ ],
+ "class_colors": [
+  [
+   46,
+   204,
+   64
+  ],
+  [
+   200,
+   0,
+   160
+  ],
+  [
+   245,
+   180,
+   0
+  ],
+  [
+   230,
+   40,
+   40
+  ],
+  [
+   0,
+   31,
+   120
+  ]
+ ],
+ "iou": {
+  "road clear": 0.38,
+  "road blocked": null,
+  "building intact": 0.1,
+  "building damaged": 0.225,
+  "water": null
+ },
+ "miou": 0.235,
+ "n_buildings": 6,
+ "status_pred": {
+  "TRUCK": 6,
+  "BOAT": 0,
+  "FOOT": 0,
+  "ISOLATED": 0
+ },
+ "status_gt": {
+  "TRUCK": 6,
+  "BOAT": 0,
+  "FOOT": 0,
+  "ISOLATED": 0
+ },
+ "n_disagree": 0,
+ "tiers_pred": {
+  "CONFIDENT_TRUCK": 6,
+  "PROBABLE_TRUCK": 0,
+  "BOAT": 0,
+  "FOOT": 0,
+  "ISOLATED": 0
+ },
+ "tier_stats": {
+  "cautious_gate": 0.15,
+  "tuned_gate": 0.2,
+  "confident": 0.9743589743589743,
+  "probable": null
+ },
+ "m_per_cell": 0.274,
+ "scale_source": "3 labelled cars"
+}
