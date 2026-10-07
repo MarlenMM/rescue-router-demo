@@ -3,7 +3,9 @@
 Live: https://marlenmm.github.io/rescue-router-demo/
 
 A drone photo after a flood is mapped into clear road, flooded road, flooded/dry building and water by
-[Chameleon](https://github.com/GitGyun/chameleon) (Kim et al., ECCV 2024), adapted from only 50 labelled photos.
+[Chameleon](https://github.com/GitGyun/chameleon) (Kim et al., ECCV 2024), adapted from only 50 labelled photos;
+[SAM](https://github.com/facebookresearch/segment-anything) (Kirillov et al., ICCV 2023) redraws the outlines of the
+buildings Chameleon finds.
 A router on the predicted map finds how a rescue team reaches each house: by truck, then boat, then the last stretch
 on foot (never back into a vehicle). Click a house to see the route, choose where the team enters, and compare with
 the labelled map (the same router on the human labels) or swipe between them.

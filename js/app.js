@@ -33,7 +33,8 @@ const CB_CLASS = {
   floodnet: [[86, 180, 233], [0, 114, 178], [213, 94, 0], [240, 228, 66], [0, 31, 120]],
   rescuenet: [[86, 180, 233], [0, 158, 115], [240, 228, 66], [213, 94, 0], [0, 31, 120]],
 };
-const MODEL_ATTRIB = '<a href="https://github.com/GitGyun/chameleon">Chameleon</a> (Kim et al., ECCV 2024)';
+const MODEL_ATTRIB = '<a href="https://github.com/GitGyun/chameleon">Chameleon</a> (Kim et al., ECCV 2024)'
+  + ' · FloodNet building outlines: <a href="https://github.com/facebookresearch/segment-anything">SAM</a>';
 
 const $ = (id) => document.getElementById(id);
 const state = { index: null, key: null, s: null, src: 'pred', layer: 'classes', lam: 5, swipe: 0.5, sel: null, anim: null,
