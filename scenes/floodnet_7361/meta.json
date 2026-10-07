@@ -4,13 +4,27 @@
  "run": "floodnet_50shot_s0_stratified",
  "decode": {
   "tau": [
-   0.4,
-   0.35,
+   0.25,
+   0.25,
    0.45,
-   0.35,
-   0.45
+   0.1,
+   0.15
   ],
-  "variant": "tau"
+  "gf": [
+   2,
+   0.001
+  ],
+  "sam": {
+   "mode": "grow",
+   "min_area": 50
+  },
+  "classmaps": {
+   "floodnet_val_tune30": "results/kaggle_v2/rr/classmaps/classmaps_floodnet_50shot_s0_stratified_floodnet_val_tune30.npz",
+   "floodnet_test_full": "results/kaggle_v2/rr/classmaps/classmaps_floodnet_50shot_s0_stratified_floodnet_test_full.npz",
+   "rescuenet_test_eval100": "results/kaggle_v2/rr/classmaps/classmaps_floodnet_50shot_s0_stratified_rescuenet_test_eval100.npz",
+   "floodnet_test_eval100": "results/kaggle_v2/rr/classmaps/classmaps_floodnet_50shot_s0_stratified_floodnet_test_full.npz"
+  },
+  "variant": "b13"
  },
  "caption": "",
  "size": [
@@ -57,17 +71,17 @@
  ],
  "iou": {
   "road clear": null,
-  "road flooded": 0.377,
-  "building flooded": 0.857,
+  "road flooded": 0.127,
+  "building flooded": 0.875,
   "building dry": null,
-  "water": 0.77
+  "water": 0.721
  },
- "miou": 0.668,
+ "miou": 0.574,
  "n_buildings": 6,
  "status_pred": {
   "TRUCK": 2,
-  "BOAT": 0,
-  "FOOT": 4,
+  "BOAT": 2,
+  "FOOT": 2,
   "ISOLATED": 0
  },
  "status_gt": {
@@ -76,19 +90,19 @@
   "FOOT": 0,
   "ISOLATED": 0
  },
- "n_disagree": 4,
+ "n_disagree": 2,
  "tiers_pred": {
-  "CONFIDENT_TRUCK": 2,
-  "PROBABLE_TRUCK": 0,
-  "BOAT": 0,
-  "FOOT": 4,
+  "CONFIDENT_TRUCK": 1,
+  "PROBABLE_TRUCK": 1,
+  "BOAT": 2,
+  "FOOT": 2,
   "ISOLATED": 0
  },
  "tier_stats": {
-  "cautious_gate": 0.1,
+  "cautious_gate": 0.05,
   "tuned_gate": 0.3,
-  "confident": 0.9867109634551495,
-  "probable": 0.7407407407407407
+  "confident": 1.0,
+  "probable": 0.794425087108014
  },
  "m_per_cell": 0.655,
  "scale_source": "6 labelled cars"

@@ -138,8 +138,18 @@ function markPressed() {
   }
 }
 
+// an uploaded photo (Gradio app, src/gradio_viewer.py): scenes/up/<token>/, not in the index, no labels
+const uploadEntry = (key) => (/^up\/[\w-]+$/.test(key || '') ? { key, dataset: 'floodnet', id: 'upload', caption: '', upload: true } : null);
+
+function setNoLabels(on) {                                         // hide everything that compares with labels
+  state.nolabels = on;
+  document.querySelectorAll('.seg button[data-src="gt"], .seg button[data-src="swipe"]').forEach(b => { b.style.display = on ? 'none' : ''; });
+  $('tDisagree').closest('label').style.display = on ? 'none' : '';
+  if (on && state.src !== 'pred') setSource('pred');
+}
+
 async function loadScene(key) {
-  const sc = state.index.scenes.find(s => s.key === key) || state.index.scenes[0];
+  const sc = state.index.scenes.find(s => s.key === key) || uploadEntry(key) || state.index.scenes[0];
   const dir = `scenes/${sc.key}/`;
   const [meta, { grid, buildings: blds }] = await Promise.all([
     fetch(dir + 'meta.json').then(r => r.json()),
@@ -150,6 +160,8 @@ async function loadScene(key) {
   state.entry = null;
   setPicking(false);
   const [W, H] = meta.size;
+  if (meta.upload) sc.caption = meta.caption;
+  setNoLabels(Boolean(meta.upload));                               // before state.s: setSource redraws the old scene
   state.s = { sc, dir, meta, grid, blds, W, H, ds: meta.dataset };
   if (sc.dataset !== state.ds) { state.ds = sc.dataset; drawBrowse(); }
   markPressed();
@@ -159,7 +171,7 @@ async function loadScene(key) {
   const shots = meta.run.match(/_(\d+)shot/)[1];
   const ious = Object.values(meta.iou).filter(v => v != null);
   $('model').innerHTML = `${DATASET[meta.dataset].name} · Chameleon adapted from <b>${shots}</b> labelled photos · ` +
-    `this photo: mean IoU ${fmt(ious.reduce((a, b) => a + b, 0) / ious.length)}`;
+    (ious.length ? `this photo: mean IoU ${fmt(ious.reduce((a, b) => a + b, 0) / ious.length)}` : 'uploaded photo: no labels to score it');
   for (const k of Object.keys(groups)) groups[k].clearLayers();
   const bounds = [[0, 0], [H, W]];
   L.imageOverlay(dir + 'photo.jpg', bounds).addTo(groups.photo);
@@ -376,9 +388,9 @@ function select(i, side, animate = true) {
   } else {
     body += '<p>No truck, boat or walking route from the entry point on this map.</p>';
   }
-  const agree = st === stO;
-  body += `<p class="${agree ? 'gtline' : 'mismatch'}">${SIDE[other]}: ${WORD[stO]}${agree ? ' ✓' : ` (${SIDE[side].toLowerCase()} says ${WORD[st]})`}</p>`;
-  body += `<p class="gtline">Label: ${CLASS_LABEL[s.ds][b.cls]} · ${SIDE[side]}${state.lam ? ', risk-aware truck' : ', shortest truck'}</p>`;
+  const agree = st === stO || state.nolabels;
+  if (!state.nolabels) body += `<p class="${agree ? 'gtline' : 'mismatch'}">${SIDE[other]}: ${WORD[stO]}${agree ? ' ✓' : ` (${SIDE[side].toLowerCase()} says ${WORD[st]})`}</p>`;
+  body += `<p class="gtline">${state.nolabels ? 'Predicted' : 'Label'}: ${CLASS_LABEL[s.ds][b.cls]} · ${SIDE[side]}${state.lam ? ', risk-aware truck' : ', shortest truck'}</p>`;
   const ts = s.meta.tier_stats, pct = (v) => `${Math.round(100 * v)} %`;
   let kind = KIND[st], title = TITLE[st];
   if (tr === 'CONFIDENT_TRUCK') {
@@ -480,6 +492,7 @@ map.on('click', (e) => {
 
 // ---------- map source, swipe ----------
 function setSource(src) {
+  if (state.nolabels && src !== 'pred') return;                     // an upload has no labelled map
   if (src === 'swipe' && state.src !== 'swipe' && state.s) {
     const c = map.latLngToContainerPoint(ll(state.s.W / 2, state.s.H / 2));
     state.swipe = Math.min(0.9, Math.max(0.1, c.x / map.getSize().x));
