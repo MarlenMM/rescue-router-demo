@@ -118,11 +118,11 @@
         about 1.6 m, so neither squeezes through the gap between two houses; people on foot can. The labelled map is the same router run on the human labels: the datasets label pixels,
         not reachability.</p>
       <p>Confidence: the prediction is routed twice, with the normal off-road rule (land where p_wet &lt; 0.3 for
-        FloodNet, 0.2 for RescueNet, each tuned on the dataset's validation photos) and a cautious one (p_wet &lt; 0.1 /
-        0.15). Houses a truck reaches even on the cautious map are confident (99 % truly truck-reachable on FloodNet test
-        photos); the others are marked "check first" (74 %). Minutes and metres are
+        FloodNet, 0.2 for RescueNet, each tuned on the dataset's validation photos) and a cautious one (p_wet &lt; 0.05 /
+        0.15). Houses a truck reaches even on the cautious map are confident (100 % truly truck-reachable on FloodNet test
+        photos); the others are marked "check first" (79 %). Minutes and metres are
         rough estimates (truck 20 km/h on roads, 5 off-road, boat 6, on foot 3; scale from the cars in the photo).</p>
-      <p>FloodNet 50-shot: mIoU .47 on the full 448-image test (PSPNet with 1,445 labels: .85 on these classes).
+      <p>FloodNet 50-shot: mIoU .51 on the full 448-image test (PSPNet with 1,445 labels: .85 on these classes).
         One showcase scene is an honest failure: shallow water read as dry land.</p>
       <p>Besides the 8 showcase scenes you can browse all 200 test photos of the evaluation split (100 FloodNet,
         100 RescueNet), not picked by us: an orange count is the houses a truck cannot reach on the prediction, a pink dot
